@@ -1,0 +1,153 @@
+Psuedocode Start
+import suguru ADT reffered to as suguru //pre-constructed ADT representing a suguru puzzle
+
+function updatePossibleValues(node)
+    for region_node in suguru.regionNodes(node) do
+        if region_node.value is not None and region_node.value in node.possibleValues then
+            remove region_node.value from node.possibleValues
+    for adjacent_node in suguru.adjacentNodes(node) do
+                if adjacent_node.value is not None and adjacent_node.value in node.possibleValues then
+                    remove adjacent_node.value from node.possibleValues
+
+function nodeSolvable(node)
+    if length of node.possibleValues = 1 then
+        return node.possibleValues[0]
+    
+    for possibleValue in node.possibleValues do
+        is_unique <-- True
+        for region_node in suguru.regionNodes(node)
+            if possibleValue in region_node.possibleValues then
+                is_unique <-- False
+                break
+        if is_unique is True do
+            return possibleValue
+    return None
+
+function updateStack(stack, node)
+    for region_node in suguru.regionNodes(node) do
+        if region_node.value is None and region_node not in stack then
+            stack.append(region_node)
+    for adjacent_node in suguru.adjacentNodes(node) do
+        if adjacent_node.value is None and adjacent_node not in stack then
+            stack.append(adjacent_node)
+    return stack
+
+function sharedNeighbours(nodeList)
+    neighbour_count <-- empty dictionary
+    shared_neighbours <-- empty list
+
+    //count the occurences of each adjacent node
+    for node in nodeList do
+        for adjacent_node in suguru.adjacentNodes(node) do
+            if adjacent_node not in nodeList then
+                if adjacent_node not in neighbour_count then
+                    neighbour_count[adjacent_node] <-- 0
+                neighbour_count[adjacent_node] <-- neighbour_count[adjacent_node] + 1
+    
+    //identify the shared neighbours
+    for node, count, in neighbour_count.items() do
+        if count = length of nodeList then
+            shared_neighbours.append(node)
+
+
+
+function suguruSolver(suguru)
+    //initialization phase
+    for node in suguru.nodes do
+        if node.value is None
+            region_size = length of suguru.regionNodes(node) + 1 //have to add one becuase regionNodes returns every OTHER node in region
+            node.possibleValues <-- [from 1 to region_size]
+            updatePossibleValues(node)
+
+    update_made <-- True
+    solved <-- False
+    innerLoop <-- True
+
+    while update_made is True do
+        update_made <-- False
+
+        nodes_solved <-- 0
+        for node in suguru.nodes
+            if node.value is not None then
+                nodes_solved <-- nodes_solved + 1
+                
+        //win condition
+        if nodes_solved = length of suguru.nodes then
+            solved <-- True
+        
+
+        while innerLoop is True do
+            innerLoop <-- False
+
+            for node in suguru.nodes do
+                if node.value is None
+                    updatePossibleValues(node)
+                    stack <-- empty stack
+                    solvable_value <-- nodeSolvable(node)
+
+                    if solvable_value is not None then
+                        //update the value for the node
+                        node.value <-- solvable_value
+                        node.possibleValues <-- empty list  //remove possible values from node
+
+                        stack <-- updateStack(stack, node)
+                        innerLoop <-- True
+                        update_made <-- True
+                    
+                    while stack is not empty do
+                        node <-- stack.pop()
+                        updatePossibleValues(node)
+                        solvable_value <-- nodeSolvable(node)
+                        if solvable_value is not None then
+                            node.value <-- solvable_value
+                            node.possibleValues <-- empty list
+                            stack <-- updateStack(stack, node)
+    
+        //shared neighbour strategy
+        breaker <-- False
+
+        visited_nodes <-- empty list
+        for node in suguru.nodes do
+            if node in visited_nodes then
+                continue //skip the node if it's already been checked
+            else do //append every region node to the visited_nodes list, so a region is checked at a time
+                visited_nodes.append(node)
+                for region_node in suguru.regionNodes(node) do
+                    visited_nodes.append(region_node)
+            
+            //get a list of every region node with the same possibleValue, then find any shared neighbours and remove that possibleValue
+            for possibleValue in range from 1 to length of suguru.regionNodes(node) do
+                shared_possibleValue <-- empty list
+                if node.value is None and possibleValue in node.possibleValues then
+                    shared_possibleValue.append(node)
+                for region_node in suguru.regionNodes(node) do
+                    if region_node.value is None and possibleValue in region_node.possibleValues then
+                        shared_possibleValue.append(region_node)
+
+                //get the shared neighbours then filter down the nodes
+                shared_neighbour_options <-- sharedNeighbours(shared_possibleValue)
+                shared_neighbours <-- empty list
+                for option in shared_neighbour_options do
+                    if option.value is None and possibleValue in option.possibleValues then
+                        shared_neighbours.append(option)
+
+                for shared_neighbour in shared_neighbours do
+                    if possibleValue in shared_neighbour.possibleValues then
+                        remove possibleValue from shared_neighbour.possibleValues
+                        innerLoop <-- True
+                        update_made <-- True
+                        breaker <-- True
+            
+            if breaker is True then //break here if an update is made to increase efficiency
+                break
+
+    if solved is True then
+        return "solution found", suguru
+    else:
+        return "solution not found", suguru
+
+
+solution_message, suguru <-- suguruSolver(suguru)
+display(solution_message)
+
+Psuedocode End

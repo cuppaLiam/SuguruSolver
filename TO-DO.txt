@@ -1,0 +1,7 @@
+TO DO:
+- make input scrollable so bigger inputs can be put in
+- make a readme file with proper documentation, including instructions/ directions of use
+- clean up code, get rid a lot of the useless logging, and maybe just keep some essential STUFF
+- turn graph into object and turn whole program proper OOP
+- turn input and graph into seperate modules that are imported for neatness
+- 
